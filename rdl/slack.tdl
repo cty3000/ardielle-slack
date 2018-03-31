@@ -1,0 +1,39 @@
+type Event Struct {
+	String type;
+    String user (optional);
+    String deleted_ts (optional);
+    String subtype (optional);
+    Bool hidden (optional);
+    String text (optional);
+    String channel;
+	Struct previous_message (optional);
+	Struct item (optional);
+	String reaction (optional);
+	String item_user (optional);
+	String event_ts;
+	String ts;
+}
+
+type Challenge Struct {
+	String token;
+	String challenge;
+	String type;
+}
+
+//
+// The events sent to your Request URL may contain sensitive information
+// associated with the workspaces having approved your Slack app.
+// To ensure that events are being delivered to a server under your direct control,
+// we must verify your ownership by issuing you a challenge request.
+//
+type Request Struct {
+	String token;
+	String challenge (optional);
+	String team_id (optional);
+	String api_app_id (optional);
+    Event event (optional);
+	String type;
+    Array<String> authed_users (optional);
+	String event_id (optional);
+	Int32 event_time (optional);
+}

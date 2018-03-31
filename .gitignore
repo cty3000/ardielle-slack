@@ -1,0 +1,10 @@
+*~
+keys/
+certs/
+go/bin
+go/pkg
+go/src/github.com
+.project
+.settings
+META-INF
+build.properties

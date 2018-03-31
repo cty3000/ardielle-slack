@@ -1,0 +1,10 @@
+include "slack.tdl";
+
+resource Request POST "/event" {
+    Request request; //The request params
+    expected OK;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError NOT_FOUND;
+    }
+}

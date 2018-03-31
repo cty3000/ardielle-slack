@@ -1,0 +1,8 @@
+//
+// A slack event API in *RDL*
+//
+name slack;
+version 1;
+namespace tk.cty4500;
+
+include "slack.rdli";
