@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"encoding/json"
+	"regexp"
 )
 
 func now() rdl.Timestamp {
@@ -49,9 +50,12 @@ type SlackImpl struct {
 	baseUrl  string
 }
 
-// GetContact implementation
+// Implementation
 func (impl *SlackImpl) PostRequest(context *rdl.ResourceContext, request *slack.Request) (*slack.Request, error) {
 	canonicalStr, err := json.Marshal(request)
+	r := regexp.MustCompile(`^<(.*)|`)
+	result := r.FindAllStringSubmatch(request.Event.Text, -1)
+	log.Printf(result[0][1])
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to Marshal Json for converting request to canonical form, Error:", err)
 		log.Printf(string(errMsg))
