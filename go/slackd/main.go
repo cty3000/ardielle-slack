@@ -53,7 +53,7 @@ type SlackImpl struct {
 // Implementation
 func (impl *SlackImpl) PostRequest(context *rdl.ResourceContext, request *slack.Request) (*slack.Request, error) {
 	canonicalStr, err := json.Marshal(request)
-	r := regexp.MustCompile(`^<(.*)|`)
+	r := regexp.MustCompile(`^<(.*?)\|`)
 	result := r.FindAllStringSubmatch(request.Event.Text, -1)
 	log.Printf(result[0][1])
 	if err != nil {
