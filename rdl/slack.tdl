@@ -11,7 +11,7 @@ type Event Struct {
 	String reaction (optional);
 	String item_user (optional);
 	String event_ts;
-	String ts;
+	String ts (optional);
 }
 
 type Challenge Struct {
