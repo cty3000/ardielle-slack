@@ -31,7 +31,7 @@ func init() {
 	tEvent.Field("reaction", "String", true, nil, "")
 	tEvent.Field("item_user", "String", true, nil, "")
 	tEvent.Field("event_ts", "String", false, nil, "")
-	tEvent.Field("ts", "String", false, nil, "")
+	tEvent.Field("ts", "String", true, nil, "")
 	sb.AddType(tEvent.Build())
 
 	tChallenge := rdl.NewStructTypeBuilder("Struct", "Challenge")

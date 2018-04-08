@@ -30,7 +30,7 @@ type Event struct {
 	Reaction         string      `json:"reaction,omitempty" rdl:"optional"`
 	Item_user        string      `json:"item_user,omitempty" rdl:"optional"`
 	Event_ts         string      `json:"event_ts"`
-	Ts               string      `json:"ts"`
+	Ts               string      `json:"ts,omitempty" rdl:"optional"`
 }
 
 //
@@ -88,14 +88,6 @@ func (self *Event) Validate() error {
 		val := rdl.Validate(SlackSchema(), "String", self.Event_ts)
 		if !val.Valid {
 			return fmt.Errorf("Event.event_ts does not contain a valid String (%v)", val.Error)
-		}
-	}
-	if self.Ts == "" {
-		return fmt.Errorf("Event.ts is missing but is a required field")
-	} else {
-		val := rdl.Validate(SlackSchema(), "String", self.Ts)
-		if !val.Valid {
-			return fmt.Errorf("Event.ts does not contain a valid String (%v)", val.Error)
 		}
 	}
 	return nil
