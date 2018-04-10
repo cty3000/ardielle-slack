@@ -55,7 +55,9 @@ func (impl *SlackImpl) PostRequest(context *rdl.ResourceContext, request *slack.
 	canonicalStr, err := json.Marshal(request)
 	r := regexp.MustCompile(`^<(.*?)\|`)
 	result := r.FindAllStringSubmatch(request.Event.Text, -1)
-	log.Printf("%s", result[0][1])
+	if result != nil && 2 <= len(result[0]) {
+		log.Printf("%s", result[0][1])
+	}
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to Marshal Json for converting request to canonical form, Error:", err)
 		log.Printf(string(errMsg))
