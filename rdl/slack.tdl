@@ -37,3 +37,11 @@ type Request Struct {
 	String event_id (optional);
 	Int32 event_time (optional);
 }
+
+type NgrokInterface Struct {
+    String public_url (optional);
+}
+
+type WebhookRequest Struct {
+    String text;
+}
