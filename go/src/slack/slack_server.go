@@ -39,6 +39,15 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 	router.POST(b+"/event", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
 		adaptor.postRequestHandler(w, m, ps)
 	})
+	router.GET(b+"/api/tunnels/command_line", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
+		adaptor.getNgrokInterfaceHandler(w, m, ps)
+	})
+	router.GET(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
+		adaptor.getWebhookResponseHandler(w, m, ps)
+	})
+	router.POST(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
+		adaptor.postWebhookRequestHandler(w, m, ps)
+	})
 	router.NotFoundHandler = func(w http.ResponseWriter, m *http.Request) {
 		rdl.JSONResponse(w, 404, rdl.ResourceError{Code: http.StatusNotFound, Message: "Not Found"})
 	}
@@ -51,6 +60,9 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 //
 type SlackHandler interface {
 	PostRequest(context *rdl.ResourceContext, request *Request) (*Request, error)
+	GetNgrokInterface(context *rdl.ResourceContext) (*NgrokInterface, error)
+	GetWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (WebhookResponse, error)
+	PostWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *WebhookRequest) (WebhookResponse, error)
 	Authenticate(context *rdl.ResourceContext) bool
 }
 
@@ -141,6 +153,71 @@ func (adaptor SlackAdaptor) postRequestHandler(writer http.ResponseWriter, reque
 		return
 	}
 	data, err := adaptor.impl.PostRequest(context, argRequest)
+	if err != nil {
+		switch e := err.(type) {
+		case *rdl.ResourceError:
+			rdl.JSONResponse(writer, e.Code, err)
+		default:
+			rdl.JSONResponse(writer, 500, &rdl.ResourceError{Code: 500, Message: e.Error()})
+		}
+	} else {
+		rdl.JSONResponse(writer, 200, data)
+	}
+
+}
+
+func (adaptor SlackAdaptor) getNgrokInterfaceHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
+	data, err := adaptor.impl.GetNgrokInterface(context)
+	if err != nil {
+		switch e := err.(type) {
+		case *rdl.ResourceError:
+			rdl.JSONResponse(writer, e.Code, err)
+		default:
+			rdl.JSONResponse(writer, 500, &rdl.ResourceError{Code: 500, Message: e.Error()})
+		}
+	} else {
+		rdl.JSONResponse(writer, 200, data)
+	}
+
+}
+
+func (adaptor SlackAdaptor) getWebhookResponseHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
+	argT := context.Params["T"]
+	argB := context.Params["B"]
+	argX := context.Params["X"]
+	data, err := adaptor.impl.GetWebhookResponse(context, argT, argB, argX)
+	if err != nil {
+		switch e := err.(type) {
+		case *rdl.ResourceError:
+			rdl.JSONResponse(writer, e.Code, err)
+		default:
+			rdl.JSONResponse(writer, 500, &rdl.ResourceError{Code: 500, Message: e.Error()})
+		}
+	} else {
+		rdl.JSONResponse(writer, 200, data)
+	}
+
+}
+
+func (adaptor SlackAdaptor) postWebhookRequestHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
+	argT := context.Params["T"]
+	argB := context.Params["B"]
+	argX := context.Params["X"]
+	body, oserr := ioutil.ReadAll(request.Body)
+	if oserr != nil {
+		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
+		return
+	}
+	var argRequest *WebhookRequest
+	oserr = json.Unmarshal(body, &argRequest)
+	if oserr != nil {
+		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
+		return
+	}
+	data, err := adaptor.impl.PostWebhookRequest(context, argT, argB, argX, argRequest)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:

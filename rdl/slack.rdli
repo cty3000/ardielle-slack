@@ -17,7 +17,18 @@ resource NgrokInterface GET "/api/tunnels/command_line" {
     }
 }
 
-resource String POST "/services/{T}/{B}/{X}" {
+resource WebhookResponse GET "/services/{T}/{B}/{X}" {
+    String T;
+    String B;
+    String X;
+    expected OK;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError NOT_FOUND;
+    }
+}
+
+resource WebhookResponse POST "/services/{T}/{B}/{X}" {
     String T;
     String B;
     String X;

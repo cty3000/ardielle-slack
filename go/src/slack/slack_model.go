@@ -231,3 +231,102 @@ func (self *Request) Validate() error {
 	}
 	return nil
 }
+
+//
+// NgrokInterface -
+//
+type NgrokInterface struct {
+	Public_url string `json:"public_url,omitempty" rdl:"optional"`
+}
+
+//
+// NewNgrokInterface - creates an initialized NgrokInterface instance, returns a pointer to it
+//
+func NewNgrokInterface(init ...*NgrokInterface) *NgrokInterface {
+	var o *NgrokInterface
+	if len(init) == 1 {
+		o = init[0]
+	} else {
+		o = new(NgrokInterface)
+	}
+	return o
+}
+
+type rawNgrokInterface NgrokInterface
+
+//
+// UnmarshalJSON is defined for proper JSON decoding of a NgrokInterface
+//
+func (self *NgrokInterface) UnmarshalJSON(b []byte) error {
+	var m rawNgrokInterface
+	err := json.Unmarshal(b, &m)
+	if err == nil {
+		o := NgrokInterface(m)
+		*self = o
+		err = self.Validate()
+	}
+	return err
+}
+
+//
+// Validate - checks for missing required fields, etc
+//
+func (self *NgrokInterface) Validate() error {
+	return nil
+}
+
+//
+// WebhookRequest -
+//
+type WebhookRequest struct {
+	Text string `json:"text"`
+}
+
+//
+// NewWebhookRequest - creates an initialized WebhookRequest instance, returns a pointer to it
+//
+func NewWebhookRequest(init ...*WebhookRequest) *WebhookRequest {
+	var o *WebhookRequest
+	if len(init) == 1 {
+		o = init[0]
+	} else {
+		o = new(WebhookRequest)
+	}
+	return o
+}
+
+type rawWebhookRequest WebhookRequest
+
+//
+// UnmarshalJSON is defined for proper JSON decoding of a WebhookRequest
+//
+func (self *WebhookRequest) UnmarshalJSON(b []byte) error {
+	var m rawWebhookRequest
+	err := json.Unmarshal(b, &m)
+	if err == nil {
+		o := WebhookRequest(m)
+		*self = o
+		err = self.Validate()
+	}
+	return err
+}
+
+//
+// Validate - checks for missing required fields, etc
+//
+func (self *WebhookRequest) Validate() error {
+	if self.Text == "" {
+		return fmt.Errorf("WebhookRequest.text is missing but is a required field")
+	} else {
+		val := rdl.Validate(SlackSchema(), "String", self.Text)
+		if !val.Valid {
+			return fmt.Errorf("WebhookRequest.text does not contain a valid String (%v)", val.Error)
+		}
+	}
+	return nil
+}
+
+//
+// WebhookResponse -
+//
+type WebhookResponse string

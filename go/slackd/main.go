@@ -12,6 +12,7 @@ import (
 	"strings"
 	"encoding/json"
 	"regexp"
+	"os/exec"
 )
 
 func now() rdl.Timestamp {
@@ -67,6 +68,65 @@ func (impl *SlackImpl) PostRequest(context *rdl.ResourceContext, request *slack.
 	}
 	log.Printf("%s", string(canonicalStr))
 	return request, nil
+}
+
+// Implementation
+func (impl *SlackImpl) GetNgrokInterface(context *rdl.ResourceContext) (*slack.NgrokInterface, error) {
+	cmdstr := "echo -n $(route | awk 'NR==3 {print $2}')"
+	out, err := exec.Command("bash", "-c", cmdstr).Output()
+	if err != nil {
+		errMsg := fmt.Sprintf("Unable to execute command, Error: %v", err)
+		log.Printf("%s", errMsg)
+		return nil, &rdl.ResourceError{Code: 500, Message: errMsg}
+	}
+	log.Printf("Output: %s", string(out))
+	if string(out) == "" {
+		errMsg := fmt.Sprintf("No output from command, Error: %s", string(out))
+		log.Printf("%s", errMsg)
+		return nil, &rdl.ResourceError{Code: 500, Message: errMsg}
+	}
+
+	client := slack.NewClient("http://" + string(out) + ":4040", nil)
+	ngrokif, err := client.GetNgrokInterface()
+	if err != nil {
+		errMsg := fmt.Sprintf("Unable to retrieve ngrok response details for GetNgrokInterface, Error: %v", err)
+		log.Printf("%s", errMsg)
+		return nil, &rdl.ResourceError{Code: 500, Message: errMsg}
+	}
+	return ngrokif, nil
+}
+
+// Implementation
+func (impl *SlackImpl) PostWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *slack.WebhookRequest) (slack.WebhookResponse, error) {
+	ngrokif, err := impl.GetNgrokInterface(context)
+	if err != nil {
+		errMsg := fmt.Sprintf("Unable to retrieve ngrok response details for PostWebhookRequest, Error: %v", err)
+		log.Printf("%s", errMsg)
+		return slack.WebhookResponse(request.Text), &rdl.ResourceError{Code: 500, Message: errMsg}
+	}
+	request.Text = ngrokif.Public_url
+	log.Printf("%s", request.Text)
+
+	slackClient := slack.NewClient("https://hooks.slack.com", getHttpTransport())
+	response, err := slackClient.PostWebhookRequest(T, B, X, request)
+	if err != nil {
+		errMsg := fmt.Sprintf("Unable to retrieve slack response details for PostWebhookRequest, Error: %v", err)
+		log.Printf("%s", errMsg)
+	}
+	return slack.WebhookResponse(response), nil
+}
+
+// Implementation
+func (impl *SlackImpl) GetWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (slack.WebhookResponse, error) {
+	return impl.PostWebhookRequest(context, T, B, X, new(slack.WebhookRequest))
+}
+
+func getHttpTransport() *http.Transport {
+	config := &tls.Config{}
+	config.InsecureSkipVerify = true
+	tr := http.Transport{}
+	tr.TLSClientConfig = config
+	return &tr
 }
 
 //

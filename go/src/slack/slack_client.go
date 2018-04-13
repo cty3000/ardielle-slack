@@ -292,3 +292,103 @@ func (client SlackClient) PostRequest(request *Request) (*Request, error) {
 		return data, errobj
 	}
 }
+
+func (client SlackClient) GetNgrokInterface() (*NgrokInterface, error) {
+	var data *NgrokInterface
+	url := client.URL + "/api/tunnels/command_line"
+	resp, err := client.httpGet(url, nil)
+	if err != nil {
+		return data, err
+	}
+	contentBytes, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return data, err
+	}
+	switch resp.StatusCode {
+	case 200:
+		err = json.Unmarshal(contentBytes, &data)
+		if err != nil {
+			return data, err
+		}
+		return data, nil
+	default:
+		var errobj rdl.ResourceError
+		json.Unmarshal(contentBytes, &errobj)
+		if errobj.Code == 0 {
+			errobj.Code = resp.StatusCode
+		}
+		if errobj.Message == "" {
+			errobj.Message = string(contentBytes)
+		}
+		return data, errobj
+	}
+}
+
+func (client SlackClient) GetWebhookResponse(T string, B string, X string) (WebhookResponse, error) {
+	var data WebhookResponse
+	url := client.URL + "/services/" + T + "/" + B + "/" + X
+	resp, err := client.httpGet(url, nil)
+	if err != nil {
+		return data, err
+	}
+	contentBytes, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return data, err
+	}
+	switch resp.StatusCode {
+	case 200:
+		err = json.Unmarshal(contentBytes, &data)
+		if err != nil {
+			return data, err
+		}
+		return data, nil
+	default:
+		var errobj rdl.ResourceError
+		json.Unmarshal(contentBytes, &errobj)
+		if errobj.Code == 0 {
+			errobj.Code = resp.StatusCode
+		}
+		if errobj.Message == "" {
+			errobj.Message = string(contentBytes)
+		}
+		return data, errobj
+	}
+}
+
+func (client SlackClient) PostWebhookRequest(T string, B string, X string, request *WebhookRequest) (WebhookResponse, error) {
+	var data WebhookResponse
+	url := client.URL + "/services/" + T + "/" + B + "/" + X
+	contentBytes, err := json.Marshal(request)
+	if err != nil {
+		return data, err
+	}
+	resp, err := client.httpPost(url, nil, contentBytes)
+	if err != nil {
+		return data, err
+	}
+	contentBytes, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return data, err
+	}
+	switch resp.StatusCode {
+	case 200:
+		err = json.Unmarshal(contentBytes, &data)
+		if err != nil {
+			return data, err
+		}
+		return data, nil
+	default:
+		var errobj rdl.ResourceError
+		json.Unmarshal(contentBytes, &errobj)
+		if errobj.Code == 0 {
+			errobj.Code = resp.StatusCode
+		}
+		if errobj.Message == "" {
+			errobj.Message = string(contentBytes)
+		}
+		return data, errobj
+	}
+}

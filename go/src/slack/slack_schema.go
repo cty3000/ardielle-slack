@@ -53,11 +53,44 @@ func init() {
 	tRequest.Field("event_time", "Int32", true, nil, "")
 	sb.AddType(tRequest.Build())
 
+	tNgrokInterface := rdl.NewStructTypeBuilder("Struct", "NgrokInterface")
+	tNgrokInterface.Field("public_url", "String", true, nil, "")
+	sb.AddType(tNgrokInterface.Build())
+
+	tWebhookRequest := rdl.NewStructTypeBuilder("Struct", "WebhookRequest")
+	tWebhookRequest.Field("text", "String", false, nil, "")
+	sb.AddType(tWebhookRequest.Build())
+
+	tWebhookResponse := rdl.NewAliasTypeBuilder("String", "WebhookResponse")
+	sb.AddType(tWebhookResponse.Build())
+
 	mPostRequest := rdl.NewResourceBuilder("Request", "POST", "/event")
 	mPostRequest.Input("request", "Request", false, "", "", false, nil, "The request params")
 	mPostRequest.Exception("BAD_REQUEST", "ResourceError", "")
 	mPostRequest.Exception("NOT_FOUND", "ResourceError", "")
 	sb.AddResource(mPostRequest.Build())
+
+	mGetNgrokInterface := rdl.NewResourceBuilder("NgrokInterface", "GET", "/api/tunnels/command_line")
+	mGetNgrokInterface.Exception("BAD_REQUEST", "ResourceError", "")
+	mGetNgrokInterface.Exception("NOT_FOUND", "ResourceError", "")
+	sb.AddResource(mGetNgrokInterface.Build())
+
+	mGetWebhookResponse := rdl.NewResourceBuilder("WebhookResponse", "GET", "/services/{T}/{B}/{X}")
+	mGetWebhookResponse.Input("T", "String", true, "", "", false, nil, "")
+	mGetWebhookResponse.Input("B", "String", true, "", "", false, nil, "")
+	mGetWebhookResponse.Input("X", "String", true, "", "", false, nil, "")
+	mGetWebhookResponse.Exception("BAD_REQUEST", "ResourceError", "")
+	mGetWebhookResponse.Exception("NOT_FOUND", "ResourceError", "")
+	sb.AddResource(mGetWebhookResponse.Build())
+
+	mPostWebhookRequest := rdl.NewResourceBuilder("WebhookResponse", "POST", "/services/{T}/{B}/{X}")
+	mPostWebhookRequest.Input("T", "String", true, "", "", false, nil, "")
+	mPostWebhookRequest.Input("B", "String", true, "", "", false, nil, "")
+	mPostWebhookRequest.Input("X", "String", true, "", "", false, nil, "")
+	mPostWebhookRequest.Input("request", "WebhookRequest", false, "", "", false, nil, "")
+	mPostWebhookRequest.Exception("BAD_REQUEST", "ResourceError", "")
+	mPostWebhookRequest.Exception("NOT_FOUND", "ResourceError", "")
+	sb.AddResource(mPostWebhookRequest.Build())
 
 	var err error
 	schema, err = sb.BuildParanoid()

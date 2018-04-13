@@ -45,3 +45,5 @@ type NgrokInterface Struct {
 type WebhookRequest Struct {
     String text;
 }
+
+type WebhookResponse String;
