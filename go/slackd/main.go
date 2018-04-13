@@ -104,7 +104,7 @@ func (impl *SlackImpl) PostWebhookRequest(context *rdl.ResourceContext, T string
 		log.Printf("%s", errMsg)
 		return slack.WebhookResponse(request.Text), &rdl.ResourceError{Code: 500, Message: errMsg}
 	}
-	request.Text = ngrokif.Public_url + "/api/v1/" + T + "/" + B + "/" + X
+	request.Text = ngrokif.Public_url + "/api/v1/services/" + T + "/" + B + "/" + X
 	log.Printf("%s", request.Text)
 
 	slackClient := slack.NewClient("https://hooks.slack.com", getHttpTransport())
