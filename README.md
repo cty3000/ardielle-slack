@@ -1,4 +1,4 @@
-# ardielle-slack
+# rdl-slack
 
 ## Making a Go server
 
