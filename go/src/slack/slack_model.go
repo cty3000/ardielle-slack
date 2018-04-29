@@ -94,81 +94,12 @@ func (self *Event) Validate() error {
 }
 
 //
-// Challenge -
-//
-type Challenge struct {
-	Token     string `json:"token"`
-	Challenge string `json:"challenge"`
-	Type      string `json:"type"`
-}
-
-//
-// NewChallenge - creates an initialized Challenge instance, returns a pointer to it
-//
-func NewChallenge(init ...*Challenge) *Challenge {
-	var o *Challenge
-	if len(init) == 1 {
-		o = init[0]
-	} else {
-		o = new(Challenge)
-	}
-	return o
-}
-
-type rawChallenge Challenge
-
-//
-// UnmarshalJSON is defined for proper JSON decoding of a Challenge
-//
-func (self *Challenge) UnmarshalJSON(b []byte) error {
-	var m rawChallenge
-	err := json.Unmarshal(b, &m)
-	if err == nil {
-		o := Challenge(m)
-		*self = o
-		err = self.Validate()
-	}
-	return err
-}
-
-//
-// Validate - checks for missing required fields, etc
-//
-func (self *Challenge) Validate() error {
-	if self.Token == "" {
-		return fmt.Errorf("Challenge.token is missing but is a required field")
-	} else {
-		val := rdl.Validate(SlackSchema(), "String", self.Token)
-		if !val.Valid {
-			return fmt.Errorf("Challenge.token does not contain a valid String (%v)", val.Error)
-		}
-	}
-	if self.Challenge == "" {
-		return fmt.Errorf("Challenge.challenge is missing but is a required field")
-	} else {
-		val := rdl.Validate(SlackSchema(), "String", self.Challenge)
-		if !val.Valid {
-			return fmt.Errorf("Challenge.challenge does not contain a valid String (%v)", val.Error)
-		}
-	}
-	if self.Type == "" {
-		return fmt.Errorf("Challenge.type is missing but is a required field")
-	} else {
-		val := rdl.Validate(SlackSchema(), "String", self.Type)
-		if !val.Valid {
-			return fmt.Errorf("Challenge.type does not contain a valid String (%v)", val.Error)
-		}
-	}
-	return nil
-}
-
-//
-// Request - The events sent to your Request URL may contain sensitive
+// SlackEvent - The events sent to your Request URL may contain sensitive
 // information associated with the workspaces having approved your Slack app. To
 // ensure that events are being delivered to a server under your direct control,
 // we must verify your ownership by issuing you a challenge request.
 //
-type Request struct {
+type SlackEvent struct {
 	Token        string   `json:"token"`
 	Challenge    string   `json:"challenge,omitempty" rdl:"optional"`
 	Team_id      string   `json:"team_id,omitempty" rdl:"optional"`
@@ -181,28 +112,28 @@ type Request struct {
 }
 
 //
-// NewRequest - creates an initialized Request instance, returns a pointer to it
+// NewSlackEvent - creates an initialized SlackEvent instance, returns a pointer to it
 //
-func NewRequest(init ...*Request) *Request {
-	var o *Request
+func NewSlackEvent(init ...*SlackEvent) *SlackEvent {
+	var o *SlackEvent
 	if len(init) == 1 {
 		o = init[0]
 	} else {
-		o = new(Request)
+		o = new(SlackEvent)
 	}
 	return o
 }
 
-type rawRequest Request
+type rawSlackEvent SlackEvent
 
 //
-// UnmarshalJSON is defined for proper JSON decoding of a Request
+// UnmarshalJSON is defined for proper JSON decoding of a SlackEvent
 //
-func (self *Request) UnmarshalJSON(b []byte) error {
-	var m rawRequest
+func (self *SlackEvent) UnmarshalJSON(b []byte) error {
+	var m rawSlackEvent
 	err := json.Unmarshal(b, &m)
 	if err == nil {
-		o := Request(m)
+		o := SlackEvent(m)
 		*self = o
 		err = self.Validate()
 	}
@@ -212,21 +143,21 @@ func (self *Request) UnmarshalJSON(b []byte) error {
 //
 // Validate - checks for missing required fields, etc
 //
-func (self *Request) Validate() error {
+func (self *SlackEvent) Validate() error {
 	if self.Token == "" {
-		return fmt.Errorf("Request.token is missing but is a required field")
+		return fmt.Errorf("SlackEvent.token is missing but is a required field")
 	} else {
 		val := rdl.Validate(SlackSchema(), "String", self.Token)
 		if !val.Valid {
-			return fmt.Errorf("Request.token does not contain a valid String (%v)", val.Error)
+			return fmt.Errorf("SlackEvent.token does not contain a valid String (%v)", val.Error)
 		}
 	}
 	if self.Type == "" {
-		return fmt.Errorf("Request.type is missing but is a required field")
+		return fmt.Errorf("SlackEvent.type is missing but is a required field")
 	} else {
 		val := rdl.Validate(SlackSchema(), "String", self.Type)
 		if !val.Valid {
-			return fmt.Errorf("Request.type does not contain a valid String (%v)", val.Error)
+			return fmt.Errorf("SlackEvent.type does not contain a valid String (%v)", val.Error)
 		}
 	}
 	return nil
@@ -276,35 +207,35 @@ func (self *NgrokInterface) Validate() error {
 }
 
 //
-// WebhookRequest -
+// SlackWebhookRequest -
 //
-type WebhookRequest struct {
+type SlackWebhookRequest struct {
 	Text string `json:"text"`
 }
 
 //
-// NewWebhookRequest - creates an initialized WebhookRequest instance, returns a pointer to it
+// NewSlackWebhookRequest - creates an initialized SlackWebhookRequest instance, returns a pointer to it
 //
-func NewWebhookRequest(init ...*WebhookRequest) *WebhookRequest {
-	var o *WebhookRequest
+func NewSlackWebhookRequest(init ...*SlackWebhookRequest) *SlackWebhookRequest {
+	var o *SlackWebhookRequest
 	if len(init) == 1 {
 		o = init[0]
 	} else {
-		o = new(WebhookRequest)
+		o = new(SlackWebhookRequest)
 	}
 	return o
 }
 
-type rawWebhookRequest WebhookRequest
+type rawSlackWebhookRequest SlackWebhookRequest
 
 //
-// UnmarshalJSON is defined for proper JSON decoding of a WebhookRequest
+// UnmarshalJSON is defined for proper JSON decoding of a SlackWebhookRequest
 //
-func (self *WebhookRequest) UnmarshalJSON(b []byte) error {
-	var m rawWebhookRequest
+func (self *SlackWebhookRequest) UnmarshalJSON(b []byte) error {
+	var m rawSlackWebhookRequest
 	err := json.Unmarshal(b, &m)
 	if err == nil {
-		o := WebhookRequest(m)
+		o := SlackWebhookRequest(m)
 		*self = o
 		err = self.Validate()
 	}
@@ -314,19 +245,19 @@ func (self *WebhookRequest) UnmarshalJSON(b []byte) error {
 //
 // Validate - checks for missing required fields, etc
 //
-func (self *WebhookRequest) Validate() error {
+func (self *SlackWebhookRequest) Validate() error {
 	if self.Text == "" {
-		return fmt.Errorf("WebhookRequest.text is missing but is a required field")
+		return fmt.Errorf("SlackWebhookRequest.text is missing but is a required field")
 	} else {
 		val := rdl.Validate(SlackSchema(), "String", self.Text)
 		if !val.Valid {
-			return fmt.Errorf("WebhookRequest.text does not contain a valid String (%v)", val.Error)
+			return fmt.Errorf("SlackWebhookRequest.text does not contain a valid String (%v)", val.Error)
 		}
 	}
 	return nil
 }
 
 //
-// WebhookResponse -
+// SlackWebhookResponse -
 //
-type WebhookResponse string
+type SlackWebhookResponse string

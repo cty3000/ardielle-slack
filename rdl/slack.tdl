@@ -14,19 +14,13 @@ type Event Struct {
 	String ts (optional);
 }
 
-type Challenge Struct {
-	String token;
-	String challenge;
-	String type;
-}
-
 //
 // The events sent to your Request URL may contain sensitive information
 // associated with the workspaces having approved your Slack app.
 // To ensure that events are being delivered to a server under your direct control,
 // we must verify your ownership by issuing you a challenge request.
 //
-type Request Struct {
+type SlackEvent Struct {
 	String token;
 	String challenge (optional);
 	String team_id (optional);
@@ -42,8 +36,8 @@ type NgrokInterface Struct {
     String public_url (optional);
 }
 
-type WebhookRequest Struct {
+type SlackWebhookRequest Struct {
     String text;
 }
 
-type WebhookResponse String;
+type SlackWebhookResponse String;

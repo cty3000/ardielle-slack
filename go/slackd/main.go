@@ -76,7 +76,7 @@ type SlackImpl struct {
 }
 
 // Implementation
-func (impl *SlackImpl) PostRequest(context *rdl.ResourceContext, request *slack.Request) (*slack.Request, error) {
+func (impl *SlackImpl) PostSlackEvent(context *rdl.ResourceContext, request *slack.SlackEvent) (*slack.SlackEvent, error) {
 	canonicalStr, err := json.Marshal(request)
 	r := regexp.MustCompile(`^<(.*?)\|`)
 	if request.Event != nil && request.Event.Text != "" {
@@ -121,28 +121,28 @@ func (impl *SlackImpl) GetNgrokInterface(context *rdl.ResourceContext) (*slack.N
 }
 
 // Implementation
-func (impl *SlackImpl) PostWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *slack.WebhookRequest) (slack.WebhookResponse, error) {
+func (impl *SlackImpl) PostSlackWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *slack.SlackWebhookRequest) (slack.SlackWebhookResponse, error) {
 	ngrokif, err := impl.GetNgrokInterface(context)
 	if err != nil {
-		errMsg := fmt.Sprintf("Unable to retrieve ngrok response details for PostWebhookRequest, Error: %v", err)
+		errMsg := fmt.Sprintf("Unable to retrieve ngrok response details for PostSlackWebhookRequest, Error: %v", err)
 		log.Printf("%s", errMsg)
-		return slack.WebhookResponse(request.Text), &rdl.ResourceError{Code: 500, Message: errMsg}
+		return slack.SlackWebhookResponse(request.Text), &rdl.ResourceError{Code: 500, Message: errMsg}
 	}
 	request.Text = ngrokif.Public_url + "/api/v1/services/" + T + "/" + B + "/" + X
 	log.Printf("%s", request.Text)
 
 	slackClient := slack.NewClient("https://hooks.slack.com", getHttpTransport())
-	response, err := slackClient.PostWebhookRequest(T, B, X, request)
+	response, err := slackClient.PostSlackWebhookRequest(T, B, X, request)
 	if err != nil {
-		errMsg := fmt.Sprintf("Unable to retrieve slack response details for PostWebhookRequest, Error: %v", err)
+		errMsg := fmt.Sprintf("Unable to retrieve slack response details for PostSlackWebhookRequest, Error: %v", err)
 		log.Printf("%s", errMsg)
 	}
-	return slack.WebhookResponse(response), nil
+	return slack.SlackWebhookResponse(response), nil
 }
 
 // Implementation
-func (impl *SlackImpl) GetWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (slack.WebhookResponse, error) {
-	return impl.PostWebhookRequest(context, T, B, X, new(slack.WebhookRequest))
+func (impl *SlackImpl) GetSlackWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (slack.SlackWebhookResponse, error) {
+	return impl.PostSlackWebhookRequest(context, T, B, X, new(slack.SlackWebhookRequest))
 }
 
 func getHttpTransport() *http.Transport {

@@ -257,8 +257,8 @@ func encodeParams(objs ...string) string {
 	return "?" + s[1:]
 }
 
-func (client SlackClient) PostRequest(request *Request) (*Request, error) {
-	var data *Request
+func (client SlackClient) PostSlackEvent(request *SlackEvent) (*SlackEvent, error) {
+	var data *SlackEvent
 	url := client.URL + "/event"
 	contentBytes, err := json.Marshal(request)
 	if err != nil {
@@ -325,8 +325,8 @@ func (client SlackClient) GetNgrokInterface() (*NgrokInterface, error) {
 	}
 }
 
-func (client SlackClient) GetWebhookResponse(T string, B string, X string) (WebhookResponse, error) {
-	var data WebhookResponse
+func (client SlackClient) GetSlackWebhookResponse(T string, B string, X string) (SlackWebhookResponse, error) {
+	var data SlackWebhookResponse
 	url := client.URL + "/services/" + T + "/" + B + "/" + X
 	resp, err := client.httpGet(url, nil)
 	if err != nil {
@@ -357,8 +357,8 @@ func (client SlackClient) GetWebhookResponse(T string, B string, X string) (Webh
 	}
 }
 
-func (client SlackClient) PostWebhookRequest(T string, B string, X string, request *WebhookRequest) (WebhookResponse, error) {
-	var data WebhookResponse
+func (client SlackClient) PostSlackWebhookRequest(T string, B string, X string, request *SlackWebhookRequest) (SlackWebhookResponse, error) {
+	var data SlackWebhookResponse
 	url := client.URL + "/services/" + T + "/" + B + "/" + X
 	contentBytes, err := json.Marshal(request)
 	if err != nil {

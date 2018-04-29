@@ -37,16 +37,16 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 	adaptor := SlackAdaptor{impl, authz, authns, b}
 
 	router.POST(b+"/event", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
-		adaptor.postRequestHandler(w, m, ps)
+		adaptor.postSlackEventHandler(w, m, ps)
 	})
 	router.GET(b+"/api/tunnels/command_line", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
 		adaptor.getNgrokInterfaceHandler(w, m, ps)
 	})
 	router.GET(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
-		adaptor.getWebhookResponseHandler(w, m, ps)
+		adaptor.getSlackWebhookResponseHandler(w, m, ps)
 	})
 	router.POST(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
-		adaptor.postWebhookRequestHandler(w, m, ps)
+		adaptor.postSlackWebhookRequestHandler(w, m, ps)
 	})
 	router.NotFoundHandler = func(w http.ResponseWriter, m *http.Request) {
 		rdl.JSONResponse(w, 404, rdl.ResourceError{Code: http.StatusNotFound, Message: "Not Found"})
@@ -59,10 +59,10 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 // SlackHandler is the interface that the service implementation must conform to
 //
 type SlackHandler interface {
-	PostRequest(context *rdl.ResourceContext, request *Request) (*Request, error)
+	PostSlackEvent(context *rdl.ResourceContext, request *SlackEvent) (*SlackEvent, error)
 	GetNgrokInterface(context *rdl.ResourceContext) (*NgrokInterface, error)
-	GetWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (WebhookResponse, error)
-	PostWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *WebhookRequest) (WebhookResponse, error)
+	GetSlackWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (SlackWebhookResponse, error)
+	PostSlackWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *SlackWebhookRequest) (SlackWebhookResponse, error)
 	Authenticate(context *rdl.ResourceContext) bool
 }
 
@@ -139,20 +139,20 @@ func floatFromString(s string) float64 {
 	return n
 }
 
-func (adaptor SlackAdaptor) postRequestHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+func (adaptor SlackAdaptor) postSlackEventHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
 	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
 	body, oserr := ioutil.ReadAll(request.Body)
 	if oserr != nil {
 		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
 		return
 	}
-	var argRequest *Request
+	var argRequest *SlackEvent
 	oserr = json.Unmarshal(body, &argRequest)
 	if oserr != nil {
 		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
 		return
 	}
-	data, err := adaptor.impl.PostRequest(context, argRequest)
+	data, err := adaptor.impl.PostSlackEvent(context, argRequest)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:
@@ -182,12 +182,12 @@ func (adaptor SlackAdaptor) getNgrokInterfaceHandler(writer http.ResponseWriter,
 
 }
 
-func (adaptor SlackAdaptor) getWebhookResponseHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+func (adaptor SlackAdaptor) getSlackWebhookResponseHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
 	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
 	argT := context.Params["T"]
 	argB := context.Params["B"]
 	argX := context.Params["X"]
-	data, err := adaptor.impl.GetWebhookResponse(context, argT, argB, argX)
+	data, err := adaptor.impl.GetSlackWebhookResponse(context, argT, argB, argX)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:
@@ -201,7 +201,7 @@ func (adaptor SlackAdaptor) getWebhookResponseHandler(writer http.ResponseWriter
 
 }
 
-func (adaptor SlackAdaptor) postWebhookRequestHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+func (adaptor SlackAdaptor) postSlackWebhookRequestHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
 	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
 	argT := context.Params["T"]
 	argB := context.Params["B"]
@@ -211,13 +211,13 @@ func (adaptor SlackAdaptor) postWebhookRequestHandler(writer http.ResponseWriter
 		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
 		return
 	}
-	var argRequest *WebhookRequest
+	var argRequest *SlackWebhookRequest
 	oserr = json.Unmarshal(body, &argRequest)
 	if oserr != nil {
 		rdl.JSONResponse(writer, http.StatusBadRequest, rdl.ResourceError{Code: http.StatusBadRequest, Message: "Bad request: " + oserr.Error()})
 		return
 	}
-	data, err := adaptor.impl.PostWebhookRequest(context, argT, argB, argX, argRequest)
+	data, err := adaptor.impl.PostSlackWebhookRequest(context, argT, argB, argX, argRequest)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:
