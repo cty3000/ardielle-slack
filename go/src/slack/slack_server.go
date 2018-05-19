@@ -39,11 +39,11 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 	router.POST(b+"/event", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
 		adaptor.postSlackEventHandler(w, m, ps)
 	})
+	router.GET(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
+		adaptor.getSlackWebhookURLHandler(w, m, ps)
+	})
 	router.GET(b+"/api/tunnels/command_line", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
 		adaptor.getNgrokInterfaceHandler(w, m, ps)
-	})
-	router.GET(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
-		adaptor.getSlackWebhookResponseHandler(w, m, ps)
 	})
 	router.POST(b+"/services/:T/:B/:X", func(w http.ResponseWriter, m *http.Request, ps map[string]string) {
 		adaptor.postSlackWebhookRequestHandler(w, m, ps)
@@ -60,8 +60,8 @@ func Init(impl SlackHandler, baseURL string, authz rdl.Authorizer, authns ...rdl
 //
 type SlackHandler interface {
 	PostSlackEvent(context *rdl.ResourceContext, request *SlackEvent) (*SlackEvent, error)
+	GetSlackWebhookURL(context *rdl.ResourceContext, T string, B string, X string) (SlackWebhookURL, error)
 	GetNgrokInterface(context *rdl.ResourceContext) (*NgrokInterface, error)
-	GetSlackWebhookResponse(context *rdl.ResourceContext, T string, B string, X string) (SlackWebhookResponse, error)
 	PostSlackWebhookRequest(context *rdl.ResourceContext, T string, B string, X string, request *SlackWebhookRequest) (SlackWebhookResponse, error)
 	Authenticate(context *rdl.ResourceContext) bool
 }
@@ -166,9 +166,12 @@ func (adaptor SlackAdaptor) postSlackEventHandler(writer http.ResponseWriter, re
 
 }
 
-func (adaptor SlackAdaptor) getNgrokInterfaceHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+func (adaptor SlackAdaptor) getSlackWebhookURLHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
 	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
-	data, err := adaptor.impl.GetNgrokInterface(context)
+	argT := context.Params["T"]
+	argB := context.Params["B"]
+	argX := context.Params["X"]
+	data, err := adaptor.impl.GetSlackWebhookURL(context, argT, argB, argX)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:
@@ -182,12 +185,9 @@ func (adaptor SlackAdaptor) getNgrokInterfaceHandler(writer http.ResponseWriter,
 
 }
 
-func (adaptor SlackAdaptor) getSlackWebhookResponseHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
+func (adaptor SlackAdaptor) getNgrokInterfaceHandler(writer http.ResponseWriter, request *http.Request, params map[string]string) {
 	context := &rdl.ResourceContext{Writer: writer, Request: request, Params: params, Principal: nil}
-	argT := context.Params["T"]
-	argB := context.Params["B"]
-	argX := context.Params["X"]
-	data, err := adaptor.impl.GetSlackWebhookResponse(context, argT, argB, argX)
+	data, err := adaptor.impl.GetNgrokInterface(context)
 	if err != nil {
 		switch e := err.(type) {
 		case *rdl.ResourceError:

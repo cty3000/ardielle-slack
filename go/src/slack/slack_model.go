@@ -164,6 +164,11 @@ func (self *SlackEvent) Validate() error {
 }
 
 //
+// SlackWebhookURL -
+//
+type SlackWebhookURL string
+
+//
 // NgrokInterface -
 //
 type NgrokInterface struct {

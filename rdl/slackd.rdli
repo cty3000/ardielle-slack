@@ -1,0 +1,21 @@
+include "slackd.tdl";
+
+resource SlackEvent POST "/event" {
+    SlackEvent request; //The request params
+    expected OK;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError NOT_FOUND;
+    }
+}
+
+resource SlackWebhookURL GET "/services/{T}/{B}/{X}" {
+    String T;
+    String B;
+    String X;
+    expected OK;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError NOT_FOUND;
+    }
+}

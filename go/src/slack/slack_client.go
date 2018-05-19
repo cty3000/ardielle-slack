@@ -257,77 +257,9 @@ func encodeParams(objs ...string) string {
 	return "?" + s[1:]
 }
 
-func (client SlackClient) PostSlackEvent(request *SlackEvent) (*SlackEvent, error) {
-	var data *SlackEvent
-	url := client.URL + "/event"
-	contentBytes, err := json.Marshal(request)
-	if err != nil {
-		return data, err
-	}
-	resp, err := client.httpPost(url, nil, contentBytes)
-	if err != nil {
-		return data, err
-	}
-	contentBytes, err = ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return data, err
-	}
-	switch resp.StatusCode {
-	case 200:
-		err = json.Unmarshal(contentBytes, &data)
-		if err != nil {
-			return data, err
-		}
-		return data, nil
-	default:
-		var errobj rdl.ResourceError
-		json.Unmarshal(contentBytes, &errobj)
-		if errobj.Code == 0 {
-			errobj.Code = resp.StatusCode
-		}
-		if errobj.Message == "" {
-			errobj.Message = string(contentBytes)
-		}
-		return data, errobj
-	}
-}
-
 func (client SlackClient) GetNgrokInterface() (*NgrokInterface, error) {
 	var data *NgrokInterface
 	url := client.URL + "/api/tunnels/command_line"
-	resp, err := client.httpGet(url, nil)
-	if err != nil {
-		return data, err
-	}
-	contentBytes, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return data, err
-	}
-	switch resp.StatusCode {
-	case 200:
-		err = json.Unmarshal(contentBytes, &data)
-		if err != nil {
-			return data, err
-		}
-		return data, nil
-	default:
-		var errobj rdl.ResourceError
-		json.Unmarshal(contentBytes, &errobj)
-		if errobj.Code == 0 {
-			errobj.Code = resp.StatusCode
-		}
-		if errobj.Message == "" {
-			errobj.Message = string(contentBytes)
-		}
-		return data, errobj
-	}
-}
-
-func (client SlackClient) GetSlackWebhookResponse(T string, B string, X string) (SlackWebhookResponse, error) {
-	var data SlackWebhookResponse
-	url := client.URL + "/services/" + T + "/" + B + "/" + X
 	resp, err := client.httpGet(url, nil)
 	if err != nil {
 		return data, err

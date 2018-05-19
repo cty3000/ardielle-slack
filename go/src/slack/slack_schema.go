@@ -47,6 +47,9 @@ func init() {
 	tSlackEvent.Field("event_time", "Int32", true, nil, "")
 	sb.AddType(tSlackEvent.Build())
 
+	tSlackWebhookURL := rdl.NewAliasTypeBuilder("String", "SlackWebhookURL")
+	sb.AddType(tSlackWebhookURL.Build())
+
 	tNgrokInterface := rdl.NewStructTypeBuilder("Struct", "NgrokInterface")
 	tNgrokInterface.Field("public_url", "String", true, nil, "")
 	sb.AddType(tNgrokInterface.Build())
@@ -64,18 +67,18 @@ func init() {
 	mPostSlackEvent.Exception("NOT_FOUND", "ResourceError", "")
 	sb.AddResource(mPostSlackEvent.Build())
 
+	mGetSlackWebhookURL := rdl.NewResourceBuilder("SlackWebhookURL", "GET", "/services/{T}/{B}/{X}")
+	mGetSlackWebhookURL.Input("T", "String", true, "", "", false, nil, "")
+	mGetSlackWebhookURL.Input("B", "String", true, "", "", false, nil, "")
+	mGetSlackWebhookURL.Input("X", "String", true, "", "", false, nil, "")
+	mGetSlackWebhookURL.Exception("BAD_REQUEST", "ResourceError", "")
+	mGetSlackWebhookURL.Exception("NOT_FOUND", "ResourceError", "")
+	sb.AddResource(mGetSlackWebhookURL.Build())
+
 	mGetNgrokInterface := rdl.NewResourceBuilder("NgrokInterface", "GET", "/api/tunnels/command_line")
 	mGetNgrokInterface.Exception("BAD_REQUEST", "ResourceError", "")
 	mGetNgrokInterface.Exception("NOT_FOUND", "ResourceError", "")
 	sb.AddResource(mGetNgrokInterface.Build())
-
-	mGetSlackWebhookResponse := rdl.NewResourceBuilder("SlackWebhookResponse", "GET", "/services/{T}/{B}/{X}")
-	mGetSlackWebhookResponse.Input("T", "String", true, "", "", false, nil, "")
-	mGetSlackWebhookResponse.Input("B", "String", true, "", "", false, nil, "")
-	mGetSlackWebhookResponse.Input("X", "String", true, "", "", false, nil, "")
-	mGetSlackWebhookResponse.Exception("BAD_REQUEST", "ResourceError", "")
-	mGetSlackWebhookResponse.Exception("NOT_FOUND", "ResourceError", "")
-	sb.AddResource(mGetSlackWebhookResponse.Build())
 
 	mPostSlackWebhookRequest := rdl.NewResourceBuilder("SlackWebhookResponse", "POST", "/services/{T}/{B}/{X}")
 	mPostSlackWebhookRequest.Input("T", "String", true, "", "", false, nil, "")

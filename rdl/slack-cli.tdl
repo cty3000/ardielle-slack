@@ -1,0 +1,9 @@
+type NgrokInterface Struct {
+    String public_url (optional);
+}
+
+type SlackWebhookRequest Struct {
+    String text;
+}
+
+type SlackWebhookResponse String;
